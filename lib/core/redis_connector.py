@@ -1,5 +1,4 @@
 import os
-from typing import Optional
 
 import redis
 from pottery import NextId
@@ -7,7 +6,10 @@ from pottery import RedisDict
 
 
 # Read redis host from env
-REDIS_HOST = os.getenv(key="REDIS_HOST", default="redis://127.0.0.1:6379/0")
+REDIS_HOST: str = os.getenv(
+    key="REDIS_HOST",
+    default="redis://127.0.0.1:6379/0",
+)
 
 
 class Redis:
@@ -19,7 +21,13 @@ class Redis:
     def __init__(self, namespace: str) -> None:
         """
         Connect to redis client
-        Raises exception if unable to connect to redis
+
+        Args:
+            namespace: Namespace for key isolation
+
+        Raises:
+            ValueError: If namespace is invalid
+            ConnectionError: If unable to connect to redis
         """
         redis_client = redis.from_url(REDIS_HOST)
 
@@ -41,15 +49,21 @@ class Redis:
     def is_connected(self) -> bool:
         """
         Check if client is connected to redis
-        :return: True if connected else False
+
+        Returns:
+            bool: True if connected else False
         """
         return self.__client.ping()
 
-    def get_key(self, key: str) -> Optional[str]:
+    def get_key(self, key: str) -> str | None:
         """
         Fetch value for the key from redis cache
-        :param key: Key to fetch value for
-        :return: Value for the key
+
+        Args:
+            key: Key to fetch value for
+
+        Returns:
+            str | None: Value for the key if exists, None otherwise
         """
         # Validate string key
         if not isinstance(key, str):
@@ -61,49 +75,90 @@ class Redis:
 
         # Attach namespace to key
         key = f"{self.__namespace}_{key}"
-        return self.__client.get(key)
+        value = self.__client.get(key)
+        return value.decode("utf-8") if value else None
 
-    def set_key(
+    def set_key(self, key: str, value: str) -> bool | None:
+        """
+        Set value for the key in redis cache without expiration
+
+        Args:
+            key: Key to set value for
+            value: Value to set
+
+        Returns:
+            bool | None: True if set successfully, None otherwise
+
+        Raises:
+            ValueError: If parameters are invalid
+        """
+        if not isinstance(key, str) or not isinstance(value, str):
+            raise ValueError("Invalid parameter types")
+
+        key = key.strip()
+        value = value.strip()
+        if not key or not value:
+            raise ValueError("Invalid parameter values")
+
+        # Attach namespace to key
+        key = f"{self.__namespace}_{key}"
+        return self.__client.set(name=key, value=value)
+
+    def set_expiring_key(
         self,
         key: str,
         value: str,
-        expire: Optional[int] = 300,
-    ) -> Optional[bool]:
+        expire: int = 300,
+    ) -> bool | None:
         """
-        Set value for the key in redis cache
-        :param key: Key to set value for
-        :param value: Value to set
-        :param expire: Expire time in seconds (minimum 1 second, maximum 1 day)
-        :return: True if set else False
+        Set value for the key in redis cache with an expiration time
+
+        Args:
+            key: Key to set value for
+            value: Value to set
+            expire: Expire time in seconds (minimum 1 second, maximum 1 day)
+
+        Returns:
+            bool | None: True if set successfully, None otherwise
+
+        Raises:
+            ValueError: If parameters are invalid
         """
         if (
             not isinstance(key, str)
             or not isinstance(value, str)
             or not isinstance(expire, int)
         ):
-            raise ValueError("Invalid parameter")
+            raise ValueError("Invalid parameter types")
 
         key = key.strip()
         value = value.strip()
         if not key or not value or not 0 < expire < 86400:
-            raise ValueError("Invalid parameter")
+            raise ValueError("Invalid parameter values")
 
         # Attach namespace to key
         key = f"{self.__namespace}_{key}"
         return self.__client.setex(name=key, value=value, time=expire)
 
-    def delete_key(self, key: str) -> Optional[int]:
+    def delete_key(self, key: str) -> int | None:
         """
         Delete key:value from redis cache
-        :param key: Key to delete
+
+        Args:
+            key: Key to delete
+
+        Returns:
+            int | None: Number of keys deleted, None if error
+
+        Raises:
+            ValueError: If key is invalid
         """
-        # Validate string key
         if not isinstance(key, str):
-            raise ValueError("Invalid key")
+            raise ValueError("Invalid key type")
 
         key = key.strip()
         if not key:
-            raise ValueError("Invalid key")
+            raise ValueError("Invalid key value")
 
         # Attach namespace to key
         key = f"{self.__namespace}_{key}"
@@ -112,31 +167,46 @@ class Redis:
     def get_dictionary(self, key: str) -> RedisDict:
         """
         Get a dictionary stored in redis
-        :param key: Key to get dictionary for
-        :return: Dictionary for the key
+
+        Args:
+            key: Key to get dictionary for
+
+        Returns:
+            RedisDict: Dictionary for the key
+
+        Raises:
+            ValueError: If key is invalid
         """
         if not isinstance(key, str):
-            raise ValueError("Invalid key")
+            raise ValueError("Invalid key type")
 
         key = key.strip()
         if not key:
-            raise ValueError("Invalid key")
+            raise ValueError("Invalid key value")
 
         # Attach namespace to key
         key = f"{self.__namespace}_{key}"
-        value = RedisDict(key=key, redis=self.__client)
-        return value
+        return RedisDict(key=key, redis=self.__client)
 
-    def get_id_generator(self, key: str):
+    def get_id_generator(self, key: str) -> NextId:
         """
         Get a unique ID generator
+
+        Args:
+            key: Key for the ID generator
+
+        Returns:
+            NextId: ID generator instance
+
+        Raises:
+            ValueError: If key is invalid
         """
         if not isinstance(key, str):
-            raise ValueError("Invalid key")
+            raise ValueError("Invalid key type")
 
         key = key.strip()
         if not key:
-            raise ValueError("Invalid key")
+            raise ValueError("Invalid key value")
 
         # Attach namespace to key
         key = f"{self.__namespace}_{key}"

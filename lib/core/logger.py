@@ -4,14 +4,21 @@ from logging import handlers
 
 import structlog
 
+from lib.core.text_processor import sanitize_text
 
 LOG_ROTATE_WHEN = os.getenv(key="LOG_ROTATE_WHEN", default="W6")
 LOG_ROTATE_BACKUP = int(os.getenv(key="LOG_ROTATE_BACKUP", default="4"))
 
 
-def initialize_logger():
+def initialize_logger(logger_name: str):
+    """
+    Initialize logger for the given logger name
+    """
+    # Process logger name to a valid file name
+    logger_name = sanitize_text(logger_name)
+
     # Configure standard logger to log to a rotating file
-    log_file_path = "logs/rest_server.log"
+    log_file_path = f"logs/{logger_name}.log"
     file_handler = handlers.TimedRotatingFileHandler(
         filename=log_file_path,
         when=LOG_ROTATE_WHEN,
