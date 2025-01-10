@@ -13,6 +13,12 @@ LOG_ROTATE_BACKUP = int(os.getenv(key="LOG_ROTATE_BACKUP", default="4"))
 def initialize_logger(logger_name: str):
     """
     Initialize logger for the given logger name
+
+    Args:
+        logger_name: Name of the logger
+
+    Returns:
+        None
     """
     # Process logger name to a valid file name
     logger_name = sanitize_text(logger_name)

@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
-from typing import Any
 from typing import AsyncGenerator
 
+import asyncpg.pool
 import structlog
 from fastapi import FastAPI
 from fastapi import Request
@@ -20,7 +20,7 @@ class CustomFastAPI(FastAPI):
     """Extended FastAPI class with custom attributes"""
 
     redis: Redis
-    postgres: Any
+    postgres: asyncpg.pool.Pool
     logger: structlog.BoundLogger
 
 
@@ -29,6 +29,9 @@ async def lifespan(app: CustomFastAPI) -> AsyncGenerator[None, None]:
     """
     Lifespan context manager for FastAPI application.
     Handles startup and shutdown events.
+
+    Args:
+        app: CustomFastAPI application
     """
     # Startup
     # Initialize cachestore

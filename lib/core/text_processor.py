@@ -4,6 +4,15 @@ import functools
 def sanitize_text(text: str) -> str:
     """
     Sanitize text to a valid file name.
+
+    Args:
+        text: Text to sanitize
+
+    Returns:
+        str: Sanitized text
+
+    Raises:
+        ValueError: If text is invalid
     """
     if not text.strip():
         raise ValueError("Invalid text")
