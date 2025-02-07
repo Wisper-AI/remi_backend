@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:4.0.5-management
+    container_name: remi_rabbitmq
+    hostname: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_logs:/var/log/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    environment:
+      - RABBITMQ_USER
+      - RABBITMQ_PASSWORD
+      - RABBITMQ_VHOST
+    networks:
+      - remi_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping && rabbitmq-diagnostics -q check_local_alarms"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+
+volumes:
+  rabbitmq_data:
+    name: remi_rabbitmq_data
+  rabbitmq_logs:
+    name: remi_rabbitmq_logs
+
+networks:
+  remi_network:
+    name: remi_network
+    driver: bridge
