@@ -1,26 +1,33 @@
-version: '3.8'
-
 services:
-  rabbitmq:
-    image: rabbitmq:3.12-management
-    container_name: remi_rabbitmq
-    hostname: rabbitmq
+  rest-server:
+    container_name: rest-server
+    build:
+      context: .
+      dockerfile: ./infra/rest_server/Dockerfile
+    image: rest-server:latest
     restart: unless-stopped
     ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-      - rabbitmq_logs:/var/log/rabbitmq
-      - ./configs/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - "5000:5000"
+
     environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
-      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST:-remi}
+      - REDIS_URL
+      - REDIS_PASSWORD
+      - JWT_ALGORITHM
+      - JWT_SECRET
+      - JWT_AUDIENCE
+      - POSTGRES_URL
+      - POSTGRES_SCHEMA
+    volumes:
+      - ./logs:/src/logs
     networks:
       - remi_network
+    # depends_on:
+    #   rabbitmq-server:
+    #     condition: service_healthy
+    #   redis-server:
+    #     condition: service_healthy
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running && rabbitmq-diagnostics -q check_local_alarms"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -30,18 +37,7 @@ services:
           memory: 1G
         reservations:
           memory: 512M
-    ulimits:
-      nofile:
-        soft: 65536
-        hard: 65536
-
-volumes:
-  rabbitmq_data:
-    name: remi_rabbitmq_data
-  rabbitmq_logs:
-    name: remi_rabbitmq_logs
 
 networks:
   remi_network:
-    name: remi_network
-    driver: bridge
+    external: true

@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
-  rabbitmq:
+  rabbitmq-server:
     image: rabbitmq:4.0.5-management
-    container_name: remi_rabbitmq
+    container_name: rabbitmq-server
     hostname: rabbitmq
     restart: unless-stopped
     ports:
