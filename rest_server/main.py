@@ -12,8 +12,8 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from lib.core.logger import initialize_logger
 from lib.core.postgres_connector import get_connection_pool
 from lib.core.redis_connector import Redis
+from lib.rest_server.middlewares import create_context
 from rest_server.import_routes import import_routes
-from rest_server.middlewares import create_context
 
 
 class CustomFastAPI(FastAPI):

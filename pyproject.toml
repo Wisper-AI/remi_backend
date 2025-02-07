@@ -23,6 +23,8 @@ structlog = "^24.4.0"
 pottery = "^3.0.0"
 types-redis = "^4.6.0.20241004"
 asyncpg-stubs = "^0.30.0"
+types-python-jose = "^3.3.4.20240106"
+python-jose = "^3.3.0"
 
 
 [build-system]
