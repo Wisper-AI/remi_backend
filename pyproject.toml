@@ -11,6 +11,12 @@ python = "^3.12"
 fastapi = "^0.115.6"
 uvicorn = "^0.34.0"
 pydantic = "^2.10.5"
+asyncpg = "^0.30.0"
+structlog = "^24.4.0"
+pottery = "^3.0.0"
+python-jose = "^3.3.0"
+gunicorn = "^23.0.0"
+pypika = "^0.48.9"
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.13.2"
@@ -18,14 +24,9 @@ pylint = "^3.3.2"
 pre-commit = "^4.0.1"
 black = "^24.10.0"
 doppler-env = "^0.3.1"
-asyncpg = "^0.30.0"
-structlog = "^24.4.0"
-pottery = "^3.0.0"
 types-redis = "^4.6.0.20241004"
 asyncpg-stubs = "^0.30.0"
 types-python-jose = "^3.3.4.20240106"
-python-jose = "^3.3.0"
-
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

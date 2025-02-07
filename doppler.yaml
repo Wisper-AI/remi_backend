@@ -1,0 +1,3 @@
+setup:
+  project: remi_backend
+  config: dev
