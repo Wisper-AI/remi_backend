@@ -6,8 +6,8 @@ from pottery import RedisDict
 
 
 # Read redis host from env
-REDIS_HOST: str = os.getenv(
-    key="REDIS_HOST",
+REDIS_URL: str = os.getenv(
+    key="REDIS_URL",
     default="redis://127.0.0.1:6379/0",
 )
 
@@ -29,7 +29,7 @@ class Redis:
             ValueError: If namespace is invalid
             ConnectionError: If unable to connect to redis
         """
-        redis_client = redis.from_url(REDIS_HOST)
+        redis_client = redis.from_url(REDIS_URL)
 
         # Validate string namespace
         if not isinstance(namespace, str):

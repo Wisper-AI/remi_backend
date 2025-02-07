@@ -41,7 +41,7 @@ async def lifespan(app: CustomFastAPI) -> AsyncGenerator[None, None]:
     # Initialize logger
     initialize_logger("rest_server")
     app.logger = structlog.get_logger("rest_server")
-    app.logger.info("Server starting up")
+    await app.logger.info("Server starting up")
 
     # Import routers
     import_routes(app)
@@ -49,7 +49,7 @@ async def lifespan(app: CustomFastAPI) -> AsyncGenerator[None, None]:
     yield  # Server is running
 
     # Shutdown
-    app.logger.info("Server shutting down")
+    await app.logger.info("Server shutting down")
     await app.postgres.close()
 
 
