@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 
+from rest_server.api.email import router as email_router
+
 
 def import_routes(app: FastAPI) -> None:
     """
@@ -8,4 +10,5 @@ def import_routes(app: FastAPI) -> None:
     Args:
         app: FastAPI application
     """
-    del app
+    app.include_router(email_router)
+    # Add other routers here as needed
