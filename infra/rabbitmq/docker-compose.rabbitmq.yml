@@ -42,5 +42,4 @@ volumes:
 
 networks:
   remi_network:
-    name: remi_network
-    driver: bridge
+    external: true
